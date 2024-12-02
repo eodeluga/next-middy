@@ -23,7 +23,7 @@ export const zodValidatorMiddle = <
     }
 
     // Attach validated input to `req`
-    req.input = result.data as T
+    req.input = result.data
   },
 
   // Validates the response output
