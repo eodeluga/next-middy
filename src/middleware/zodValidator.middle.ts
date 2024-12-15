@@ -1,17 +1,14 @@
+import { Middleware } from '@/types/middleware.type'
 import { INextRequest } from '@/types/next.type'
 import { z } from 'zod'
 
 // Middleware function for Zod validation
-export const zodValidatorMiddle = <
-  I extends z.ZodTypeAny,
-  O extends z.ZodTypeAny,
-  T = z.infer<I>
->(
-  inputSchema: I,
+export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
+  inputSchema: I, 
   outputSchema?: O
-) => ({
+): Middleware<z.infer<I>> => ({
   // Validates the request input
-  before: async (req: INextRequest<T>) => {
+  before: async (req: INextRequest<z.infer<I>>) => {
     const targetValidation = {
       ...req.query,
       ...(req.body || {}),
@@ -19,7 +16,12 @@ export const zodValidatorMiddle = <
 
     const result = inputSchema.safeParse(targetValidation)
     if (!result.success) {
-      throw result.error.issues
+      throw {
+        code: 'ZodValidationError',
+        message: 'Invalid input',
+        detail: result.error.issues,
+        path: ['zodValidator', 'before'],
+      }
     }
 
     // Attach validated input to `req`
@@ -34,7 +36,7 @@ export const zodValidatorMiddle = <
         throw {
           code: 'ZodValidationError',
           message: 'Invalid output',
-          detail: result.error.errors,
+          detail: result.error.issues,
           path: ['zodValidator', 'after'],
         }
       }
