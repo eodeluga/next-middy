@@ -23,7 +23,10 @@ class NextMiddy<T> {
       // Run `before` middleware in order
       for (const middleware of this.middlewares) {
         if (middleware.before) {
+          // Merge the input object with the previous input
+          const previousInput = req.input
           await middleware.before(req, res)
+          req.input = { ...previousInput, ...req.input }
           if (res.headersSent) return
         }
       }
