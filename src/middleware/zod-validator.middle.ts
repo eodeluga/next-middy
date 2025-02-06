@@ -1,5 +1,5 @@
 import { Middleware } from '@/types/middleware.type'
-import { INextRequest } from '@/types/next.type'
+import { INextApiRequest } from '@/types/next.type'
 import { z } from 'zod'
 
 // Middleware function for Zod validation
@@ -8,7 +8,7 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   outputSchema?: O
 ): Middleware<z.infer<I>> => ({
   // Validates the request input
-  before: async (req: INextRequest<z.infer<I>>) => {
+  before: async (req: INextApiRequest<z.infer<I>>) => {
     const targetValidation = {
       ...req.query,
       ...(req.body || {}),
