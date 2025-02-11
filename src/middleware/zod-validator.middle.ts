@@ -1,5 +1,6 @@
 import { Middleware } from '@/types/middleware.type'
-import { INextRequest } from '@/types/next.type'
+import { INextApiRequest } from '@/types/next.type'
+import { NextApiResponse } from 'next'
 import { z } from 'zod'
 
 // Middleware function for Zod validation
@@ -8,7 +9,10 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   outputSchema?: O
 ): Middleware<z.infer<I>> => ({
   // Validates the request input
-  before: async (req: INextRequest<z.infer<I>>) => {
+  before: async (
+    req: INextApiRequest<z.infer<I>>,
+    res: NextApiResponse
+  ) => {
     const targetValidation = {
       ...req.query,
       ...(req.body || {}),
@@ -16,6 +20,10 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
 
     const result = inputSchema.safeParse(targetValidation)
     if (!result.success) {
+      res.status(401).json({
+        error: 'No input found',
+      })
+      
       throw {
         code: 'ZodValidationError',
         message: 'Invalid input',
@@ -29,10 +37,16 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   },
 
   // Validates the response output
-  after: async (data: unknown) => {
+  after: async (
+    data: unknown,
+    res: NextApiResponse
+  ) => {
     if (outputSchema) {
       const result = outputSchema.safeParse(data)
       if (!result.success) {
+        res.status(401).json({
+          error: 'No output found',
+        })
         throw {
           code: 'ZodValidationError',
           message: 'Invalid output',

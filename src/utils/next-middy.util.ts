@@ -1,6 +1,6 @@
 import { NextApiHandler, NextApiResponse } from 'next/types'
 import { Middleware } from '@/types/middleware.type'
-import { INextHandler, INextRequest } from '@/types/next.type'
+import { INextHandler, INextApiRequest } from '@/types/next.type'
 import { ErrorObj } from '@/types/error-obj.type'
 
 class NextMiddy<T> {
@@ -18,7 +18,7 @@ class NextMiddy<T> {
   }
 
   // Execute all middleware and the handler
-  private async executeHandler(req: INextRequest<T>, res: NextApiResponse) {
+  private async executeHandler(req: INextApiRequest<T>, res: NextApiResponse) {
     try {
       // Run `before` middleware in order
       for (const middleware of this.middlewares) {
@@ -81,7 +81,7 @@ class NextMiddy<T> {
 
   // Export the handler
   execute(): NextApiHandler {
-    return (req, res) => this.executeHandler(req as INextRequest<T>, res)
+    return (req, res) => this.executeHandler(req as INextApiRequest<T>, res)
   }
 }
 
