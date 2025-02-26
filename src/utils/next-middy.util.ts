@@ -1,7 +1,7 @@
 import { NextApiHandler, NextApiResponse } from 'next/types'
 import { Middleware } from '@/types/middleware.type'
 import { INextHandler, INextApiRequest } from '@/types/next.type'
-import { ErrorObj } from '@/types/error-obj.type'
+import { BaseError } from '@/utils/errors.util'
 
 class NextMiddy<T> {
   private handler: INextHandler<T>
@@ -42,44 +42,34 @@ class NextMiddy<T> {
         }
       }
     } catch (error) {
-      const normalizedError = Array.isArray(error) && error[0] && 'message' in error[0]
-        ? {
-            code: (error[0] as ErrorObj).code || 'UnknownError',
-            message: (error[0] as ErrorObj).message,
-            stack: (error[0] as ErrorObj).stack || '',
-            expected: (error[0] as ErrorObj).expected || '',
-            received: (error[0] as ErrorObj).received || '',
-          }
-        : 'message' in (error as ErrorObj)
-        ? {
-            code: (error as ErrorObj).code || 'UnknownError',
-            message: (error as ErrorObj).message,
-            stack: (error as ErrorObj).stack || '',
-            expected: (error as ErrorObj).expected || '',
-            received: (error as ErrorObj).received || '',
-          }
-        : {
-            code: 'UnknownError',
-            message: 'An unknown error occurred.',
-          }
-
+      const normalizedError = error instanceof BaseError
+        ? error
+        : new BaseError(500, 'UnknownError', 'An unexpected error occurred', {
+            originalError: error instanceof Error ? error.message : String(error),
+          })
       // Run `onError` middleware in reverse order
       for (const middleware of [...this.middlewares].reverse()) {
         if (middleware.onError) {
-          await middleware.onError(normalizedError, req, res)
-          return
+          try {
+            await middleware.onError(normalizedError, req, res)
+          } catch (middlewareError) {
+            console.error('Middleware onError failed:', middlewareError)
+          }
         }
       }
 
       // Default error handler
       if (!res.headersSent) {
-        console.error('Unhandled API Error:', normalizedError.message)
-        res.status(500).json({ error: 'Internal Server Error' })
+        console.error('Unhandled API Error:', normalizedError)
+        res.status(normalizedError.status).json({
+          error: normalizedError.code,
+          message: normalizedError.message,
+          ...(process.env.NODE_ENV === 'development' ? { details: normalizedError.details } : {}),
+        })
       }
     }
   }
 
-  // Export the handler
   execute(): NextApiHandler {
     return (req, res) => this.executeHandler(req as INextApiRequest<T>, res)
   }
