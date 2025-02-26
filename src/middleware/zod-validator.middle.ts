@@ -9,9 +9,7 @@ export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   outputSchema?: O
 ): Middleware<z.infer<I>> => ({
   // Validates the request input
-  before: async (
-    req: INextApiRequest<z.infer<I>>,
-  ) => {
+  before: async (req: INextApiRequest<z.infer<I>>) => {
     const targetValidation = {
       ...req.query,
       ...(req.body || {}),
@@ -19,10 +17,7 @@ export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
 
     const result = inputSchema.safeParse(targetValidation)
     if (!result.success) {
-        throw new ZodValidationError(
-          'input',
-          result.error.issues,
-        )
+      throw new ZodValidationError('input', result.error.issues)
     }
 
     // Attach validated input to `req`
@@ -30,16 +25,11 @@ export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   },
 
   // Validates the response output
-  after: async (
-    data: unknown,
-  ) => {
+  after: async (data: unknown) => {
     if (outputSchema) {
       const result = outputSchema.safeParse(data)
       if (!result.success) { 
-        throw new ZodValidationError(
-          'output',
-          result.error.issues,
-        )
+        throw new ZodValidationError('output', result.error.issues)
       }
     }
   },
