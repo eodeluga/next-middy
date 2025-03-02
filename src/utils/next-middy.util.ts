@@ -42,7 +42,7 @@ class NextMiddy<T> {
         }
       }
     } catch (error) {
-      const normalizedError = error instanceof BaseError
+      const normalisedError = error instanceof BaseError
         ? error
         : new BaseError(500, 'UnknownError', 'An unexpected error occurred', {
             originalError: error instanceof Error ? error.message : String(error),
@@ -51,7 +51,7 @@ class NextMiddy<T> {
       for (const middleware of [...this.middlewares].reverse()) {
         if (middleware.onError) {
           try {
-            await middleware.onError(normalizedError, req, res)
+            await middleware.onError(normalisedError, req, res)
           } catch (middlewareError) {
             console.error('Middleware onError failed:', middlewareError)
           }
@@ -60,11 +60,10 @@ class NextMiddy<T> {
 
       // Default error handler
       if (!res.headersSent) {
-        console.error('Unhandled API Error:', normalizedError)
-        res.status(normalizedError.status).json({
-          error: normalizedError.code,
-          message: normalizedError.message,
-          ...(process.env.NODE_ENV === 'development' ? { details: normalizedError.details } : {}),
+        res.status(normalisedError.status).json({
+          error: normalisedError.code,
+          message: normalisedError.message,
+          ...(process.env.NODE_ENV === 'development' ? { details: normalisedError.details } : {}),
         })
       }
     }
