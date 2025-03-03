@@ -5,23 +5,25 @@ import { z } from 'zod'
 
 // Middleware function for Zod validation
 export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
-  inputSchema: I, 
+  inputSchema?: I, 
   outputSchema?: O
 ): Middleware<z.infer<I>> => ({
   // Validates the request input
   before: async (req: INextApiRequest<z.infer<I>>) => {
-    const targetValidation = {
-      ...req.query,
-      ...(req.body || {}),
-    }
+    if (inputSchema) {
+      const targetValidation = {
+        ...req.query,
+        ...(req.body || {}),
+      }
 
-    const result = inputSchema.safeParse(targetValidation)
-    if (!result.success) {
-      throw new ZodValidationError('input', result.error.issues)
-    }
+      const result = inputSchema.safeParse(targetValidation)
+      if (!result.success) {
+        throw new ZodValidationError('input', result.error.issues)
+      }
 
-    // Attach validated input to `req`
-    req.input = result.data
+      // Attach validated input to `req`
+      req.input = result.data
+    }
   },
 
   // Validates the response output
