@@ -12,11 +12,9 @@ export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   before: async (req: INextApiRequest<z.infer<I>>) => {
     if (inputSchema) {
       // Parse the request body
-      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
-
       const targetValidation = {
         ...req.query,
-        ...(body || {}),
+        ...(req.body || {}),
       }
 
       const result = inputSchema.safeParse(targetValidation)
