@@ -1,25 +1,18 @@
-import { Middleware } from '@/types/middleware.type'
-import { INextApiRequest } from '@/types/next.type'
-import { ZodValidationError } from '@/utils/errors.util'
 import { z } from 'zod'
+import type { NextMiddyApiRequest, NextMiddyLifecycle } from '@/utils/next-middy.util'
+import { ZodValidationError } from '@/errors/zod-validation.error'
 
 // Middleware function for Zod validation
-export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
+export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
   inputSchema?: I, 
   outputSchema?: O
-): Middleware<z.infer<I>> => ({
+): NextMiddyLifecycle<z.infer<I>> => ({
   // Validates the request input
-  before: async (req: INextApiRequest<z.infer<I>>) => {
+  before: (req: NextMiddyApiRequest<z.infer<I>>) => {
     if (inputSchema) {
-      // Parse the request body
-      const targetValidation = {
-        ...req.query,
-        ...(req.body || {}),
-      }
-
-      const result = inputSchema.safeParse(targetValidation)
+      const result = inputSchema.safeParse(req.input)
       if (!result.success) {
-        throw new ZodValidationError('input', result.error.issues)
+        throw new ZodValidationError('input', result.error)
       }
 
       // Attach validated input to `req`
@@ -28,11 +21,11 @@ export const ZodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
   },
 
   // Validates the response output
-  after: async (data: unknown) => {
+  after: (data: unknown) => {
     if (outputSchema) {
       const result = outputSchema.safeParse(data)
       if (!result.success) { 
-        throw new ZodValidationError('output', result.error.issues)
+        throw new ZodValidationError('output', result.error)
       }
     }
   },
