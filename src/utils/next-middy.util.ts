@@ -1,24 +1,8 @@
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next/types'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-interface NextMiddyLifecycle<I = object, O = unknown> {
-  before?: (req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void 
-  after?: (req: NextMiddyApiRequest<I>, res: NextApiResponse, data: O) => Promise<void> | void
-  onError?: (err: NextMiddyError, req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void
-}
-
-// Extending NextApiRequest to include `input`
-interface NextMiddyApiRequest<T> extends NextApiRequest {
-  input: T
-  internal: {
-    error?: NextMiddyError
-    [key: string]: unknown
-  }
-}
-
-interface NextMiddyHttp<T> {
-  (req: NextMiddyApiRequest<T>, res: NextApiResponse): Promise<void> | void
-}
-
+/**
+ * Represents a structured middleware or handler error.
+ */
 interface NextMiddyError extends Error {
   status: number
   code: string
@@ -26,89 +10,144 @@ interface NextMiddyError extends Error {
   path?: string[]
 }
 
-type NextMiddyHandler<T> = NextApiHandler & {
-  use: (middleware: NextMiddyLifecycle<T>) => NextMiddyHandler<T>
+/**
+ * Extended request object exposing parsed input and middleware state.
+ */
+interface NextMiddyApiRequest<I> extends NextApiRequest {
+  input: I
+  internal: {
+    error?: NextMiddyError
+    [key: string]: unknown
+  }
 }
 
-const nextMiddy = <T = object>(handler: NextMiddyHttp<T>): NextMiddyHandler<T> => {
-  const middlewares: NextMiddyLifecycle<T>[] = []
-  
-  // Let instances be callable like a NextApiHandler
-  const apiHandler: NextMiddyHandler<T> = ((req: NextMiddyApiRequest<T>, res) =>
-    executeHandler(req, res, handler, middlewares)) as NextMiddyHandler<T>
-    
-  // attach .use() to the function
-  apiHandler.use = (middleware: NextMiddyLifecycle<T>) => {
+/**
+ * Extended response object exposing structured output.
+ */
+interface NextMiddyApiResponse<O> extends NextApiResponse {
+  output?: O
+}
+
+/**
+ * Middleware lifecycle definition used by nextMiddy.
+ * Each lifecycle function can intercept, modify, or react to handler flow.
+ */
+interface NextMiddyLifecycle<I, O> {
+  /**
+   * Runs before the main handler executes.
+   * Can read or modify `req.input` and perform setup or validation logic.
+   */
+  before?: (req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void
+
+  /**
+   * Runs after the main handler completes successfully.
+   * Receives the handler output for additional transformation or side effects.
+   */
+  after?: (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>, data: O) => Promise<void> | void
+
+  /**
+   * Runs if an exception occurs during `before`, `handler`, or `after`.
+   * Used for logging, cleanup, or consistent error response handling.
+   */
+  onError?: (err: NextMiddyError, req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void
+}
+
+/**
+ * Core handler signature used within nextMiddy pipelines.
+ */
+type NextMiddyHandlerFn<I, O> = (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>) => Promise<O | void> | O | void
+
+/**
+ * A callable Next.js API handler extended with `.use()` for middleware chaining.
+ */
+interface NextMiddyHandler<I, O> {
+  (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>): Promise<void>
+  use: (middleware: NextMiddyLifecycle<I, O>) => NextMiddyHandler<I, O>
+}
+
+/**
+ * Factory that wraps a Next.js API handler with before/after/error middleware support.
+ */
+const nextMiddy = <I extends object = object, O extends object = object>(
+  handler: NextMiddyHandlerFn<I, O>
+): NextMiddyHandler<I, O> => {
+  const middlewares: NextMiddyLifecycle<I, O>[] = []
+
+  const apiHandler = (async (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>): Promise<void> => {
+    await executeHandler(req, res, handler, middlewares)
+  }) as NextMiddyHandler<I, O>
+
+  apiHandler.use = (middleware: NextMiddyLifecycle<I, O>): NextMiddyHandler<I, O> => {
     middlewares.push(middleware)
     return apiHandler
   }
-  
+
   return apiHandler
 }
 
-// Execute all middleware and the handler
-const executeHandler = async <T>(
-  req: NextMiddyApiRequest<T>,
-  res: NextApiResponse,
-  handler: NextMiddyHttp<T>,
-  middlewares: NextMiddyLifecycle<T>[]
-) => {
-  // Initialise properties
+const executeHandler = async <I, O>(
+  req: NextMiddyApiRequest<I>,
+  res: NextMiddyApiResponse<O>,
+  handler: NextMiddyHandlerFn<I, O>,
+  middlewares: NextMiddyLifecycle<I, O>[]
+): Promise<void> => {
   if (!req.internal) { req.internal = {} }
-  if (!req.input) { req.input = {} as T }
-  
+  if (!req.input) { req.input = {} as I }
+
   // Populate req.input with query/body values if no middleware has done so.
   if (Object.keys(req.input ?? {}).length === 0) {
     // Strips internal Next.js params (e.g. `_rsc`) to avoid leaking them into input.
     const filteredQuery = Object.fromEntries(
       Object.entries(req.query).filter(([key]) => !key.startsWith('_'))
     )
-    req.input = { ...filteredQuery, ...(req.body || {}) } as T
+    req.input = { ...filteredQuery, ...(req.body || {}) } as I
   }
-  
+
   try {
-    // `before` middleware run in order
     for (const middleware of middlewares) {
       if (middleware.before) {
-        // Merge the input object with the previous input
-        const previousInput = req.input
+        const prev = req.input
         await middleware.before(req, res)
-        req.input = { ...previousInput, ...req.input }
+        req.input = { ...prev, ...req.input }
         if (res.headersSent) { return }
       }
     }
-    
-    // handler
-    const handlerResponse = await handler(req, res)
+
+    const handlerResult = await handler(req, res)
     if (res.headersSent) { return }
 
-    // `after` middleware run in reverse order
+    if (handlerResult !== undefined) {
+      res.output = handlerResult as O
+    }
+
     for (const middleware of [...middlewares].reverse()) {
-      if (middleware.after) {
-        await middleware.after(req, res, handlerResponse)
+      if (middleware.after && res.output !== undefined) {
+        await middleware.after(req, res, res.output)
       }
     }
 
-  } catch (error) {
-    const isMiddlewareError = (e: unknown): e is NextMiddyError => typeof e === 'object'
-      && e !== null 
-      && ('status' in e && typeof e.status === 'number')
-      && ('code' in e && typeof e.code === 'string')
-    
-    const normalisedError = isMiddlewareError(error)
-      ? error
+    if (!res.headersSent) {
+      res.status(200).json({ data: res.output ?? null })
+    }
+
+  } catch (err) {
+    const isMiddyError = (e: unknown): e is NextMiddyError => typeof e === 'object'
+      && e !== null
+      && 'status' in e
+      && 'code' in e
+
+    const normalisedError: NextMiddyError = isMiddyError(err)
+      ? err
       : {
         name: 'MiddlewareError',
         code: 'InternalError',
-        message: 'An internal error has occurred',
-        details: error instanceof Error ? error.message : String(error),
+        message: err instanceof Error ? err.message : String(err),
         status: 500,
-      } satisfies NextMiddyError
+      }
     
     // Use `internal` as a middleware scratch pad
     req.internal.error = normalisedError
-    
-    // Run `onError` middleware in reverse order
+
     for (const middleware of [...middlewares].reverse()) {
       if (middleware.onError) {
         try {
@@ -118,7 +157,7 @@ const executeHandler = async <T>(
         }
       }
     }
-    
+
     // Fallback only if no middleware responded
     if (!res.headersSent) {
       res.status(normalisedError.status).json({
@@ -132,5 +171,9 @@ const executeHandler = async <T>(
 export {
   nextMiddy,
   type NextMiddyApiRequest,
+  type NextMiddyApiResponse,
   type NextMiddyLifecycle,
+  type NextMiddyHandler,
+  type NextMiddyHandlerFn,
+  type NextMiddyError,
 }
