@@ -1,4 +1,4 @@
-import { EnrichedError } from '../../packages/core/enriched.error'
+import { EnrichedError } from '../errors/enriched.error'
 import { NextMiddyLifecycle } from '../utils/next-middy.util'
 
 /**

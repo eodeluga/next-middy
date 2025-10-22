@@ -1,0 +1,40 @@
+{
+  "name": "@eodeluga/next-middy-core",
+  "version": "1.0.0",
+  "description": "Core utilities for next-middy: typed middleware, structured error handling, and Next.js integration.",
+  "author": "Eugene Odeluga <eodeluga@users.noreply.github.com> (https://github.com/eodeluga)",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^24.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eodeluga/next-middy"
+  },
+  "bugs": {
+    "url": "https://github.com/eodeluga/next-middy/issues"
+  },
+  "homepage": "https://github.com/eodeluga/next-middy#readme",
+  "keywords": [
+    "nextjs",
+    "middleware",
+    "typescript",
+    "api",
+    "error-handling"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

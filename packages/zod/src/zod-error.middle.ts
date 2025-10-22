@@ -1,6 +1,6 @@
-import { EnrichedError } from '../../packages/core/enriched.error'
-import { ZodValidationError } from '../../packages/zod/zod-validation.error'
-import { NextMiddyLifecycle } from '../utils/next-middy.util'
+import { EnrichedError } from '../../core/src/errors/enriched.error'
+import { ZodValidationError } from './zod-validation.error'
+import { NextMiddyLifecycle } from '../../core/src/utils/next-middy.util'
 
 /**
  * Zod specific error logging middleware.
