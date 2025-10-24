@@ -20,11 +20,12 @@ describe('zodValidatorMiddle', () => {
 
     const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: 46 })
 
-    const handler = nextMiddy<Input, Output>(async (req, res) => {
+    const handler = nextMiddy<Input, Output>((req) => {
       const { name, age } = req.input
       return { message: `${name} is ${age}` }
 
-    }).use(zodValidatorMiddle(inputSchema, outputSchema))
+    })
+      .use(zodValidatorMiddle(inputSchema, outputSchema))
 
     await handler(req, res)
 
@@ -38,28 +39,34 @@ describe('zodValidatorMiddle', () => {
 
     const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: -10 })
 
-    const handler = nextMiddy<Input, Output>(async (req, res) => {
+    const handler = nextMiddy<Input, Output>((_, res) => {
       return res.json({ message: 'should not reach' })
-    }).use(zodValidatorMiddle(inputSchema, outputSchema))
+    })
+      .use(zodValidatorMiddle(inputSchema, outputSchema))
 
-    await expect(handler(req, res)).rejects.toThrowError(/input/)
+    await handler(req, res)
+
+    expect(res.statusCode).toBe(500)
+    expect(req.internal.error).toBeDefined()
+    expect(req.internal.error?.message).toMatch(/input/)
   })
 
   it('throws a validation error for invalid output', async () => {
     type Input = z.infer<typeof inputSchema>
     type Output = z.infer<typeof outputSchema>
 
-    const badOutputSchema = outputSchema.omit({
-      message: true
-    }) as z.ZodObject<{ message: z.ZodString}>
-    
     const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: 46 })
 
-    const handler = nextMiddy<Input, { message: string }>(async (req, res) => {
-      const { name } = req.input
-      return res.json({ message: `Hello ${name}` })
-    }).use(zodValidatorMiddle(inputSchema, badOutputSchema))
+    const handler = nextMiddy<Input, Output>(() => {
+      // Explicit cast as invalid shape object
+      return { message: null } as unknown as { message: string }
+    })
+      .use(zodValidatorMiddle(inputSchema, outputSchema))
 
-    await expect(handler(req, res)).rejects.toThrowError(/output/)
+    await handler(req, res)
+    
+    expect(res.statusCode).toBe(500)
+    expect(req.internal.error).toBeDefined()
+    expect(req.internal.error?.message).toMatch(/output/)
   })
 })
