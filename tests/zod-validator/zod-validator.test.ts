@@ -31,6 +31,8 @@ describe('zodValidatorMiddle', () => {
 
     expect(req.input).toEqual({ name: 'Eugene', age: 46 })
     expect(res.output).toEqual({ message: 'Eugene is 46' })
+    expect(res.statusCode).toBe(200)
+    
   })
 
   it('throws a validation error for invalid input', async () => {
@@ -46,7 +48,7 @@ describe('zodValidatorMiddle', () => {
 
     await handler(req, res)
 
-    expect(res.statusCode).toBe(500)
+    expect(res.statusCode).toBe(400)
     expect(req.internal.error).toBeDefined()
     expect(req.internal.error?.message).toMatch(/input/)
   })
@@ -65,7 +67,7 @@ describe('zodValidatorMiddle', () => {
 
     await handler(req, res)
     
-    expect(res.statusCode).toBe(500)
+    expect(res.statusCode).toBe(400)
     expect(req.internal.error).toBeDefined()
     expect(req.internal.error?.message).toMatch(/output/)
   })
