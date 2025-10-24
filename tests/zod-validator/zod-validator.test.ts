@@ -20,17 +20,16 @@ describe('zodValidatorMiddle', () => {
 
     const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: 46 })
 
-    let output = null
     const handler = nextMiddy<Input, Output>(async (req, res) => {
       const { name, age } = req.input
-      output = { message: `${name} is ${age}` }
-      return output
+      return { message: `${name} is ${age}` }
+
     }).use(zodValidatorMiddle(inputSchema, outputSchema))
 
     await handler(req, res)
 
     expect(req.input).toEqual({ name: 'Eugene', age: 46 })
-    expect(res.output).toEqual(output)
+    expect(res.output).toEqual({ message: 'Eugene is 46' })
   })
 
   it('throws a validation error for invalid input', async () => {
