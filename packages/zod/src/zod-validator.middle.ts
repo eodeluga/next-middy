@@ -7,7 +7,7 @@ import { ZodValidationError } from './zod-validation.error'
  * Automatically parses and attaches validated data to `req.input` and `res.output`.
  */
 export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
-  inputSchema?: I, 
+  inputSchema?: I,
   outputSchema?: O
 ): NextMiddyLifecycle<z.infer<I>, z.infer<O>> => ({
   // Validates the request input
@@ -31,8 +31,8 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
     if (!parsed.success) { 
       throw new ZodValidationError('output', parsed.error)
     }
-      
+
     // Attach validated output
-    res.output = parsed.data  
+    res.output = parsed.data
   }
 })
