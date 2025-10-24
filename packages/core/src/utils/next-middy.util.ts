@@ -127,7 +127,7 @@ const executeHandler = async <I, O>(
     }
 
     if (!res.headersSent) {
-      res.status(200).json({ data: res.output ?? null })
+      res.status(200).json(res.output ? { ...res.output } : {})
     }
 
   } catch (err) {
