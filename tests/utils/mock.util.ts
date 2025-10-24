@@ -1,16 +1,17 @@
 import type { NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/core/src/utils/next-middy.util'
 
-// Mock minimal but type-complete Next.js request/response
-export const createMockContext = <I, O>(input: I) => {
+/** 
+ * Mock minimal Next.js request/response
+ * @param input I
+ */
+const createMockContext = <I, O>(input: I) => {
   const req: NextMiddyApiRequest<I> = {
-    // --- Required NextApiRequest fields ---
     method: 'POST',
     url: '/api/test',
     headers: {},
     query: {},
     cookies: {},
     env: {} as any,
-    // --- NextMiddy additions ---
     body: input,
     input,
     internal: {},
@@ -37,3 +38,16 @@ export const createMockContext = <I, O>(input: I) => {
 
   return { req, res }
 }
+
+/**
+ * Makes a read /write version of res.headersSent
+ * @param res NextMiddyApiResponse<T>
+ */
+function markHeadersSentRW<T>(
+  res: NextMiddyApiResponse<T>,
+  // value: boolean
+): asserts res is NextMiddyApiResponse<T> & { headersSent: boolean } {
+  Object.defineProperty(res, 'headersSent', { value: false, configurable: true })
+}
+
+export { createMockContext, markHeadersSentRW }
