@@ -71,7 +71,7 @@ export default handler
   ```
 - Successful requests return:
   ```json
-  { "data": { "message": "Hello, Eugene!" } }
+  { "message": "Hello, Eugene!" }
   ```
 
 ---
