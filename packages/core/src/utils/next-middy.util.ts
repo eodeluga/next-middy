@@ -17,7 +17,7 @@ interface NextMiddyApiRequest<I> extends NextApiRequest {
   input: I
   internal: {
     error?: NextMiddyError
-    [key: string]: unknown
+    [key: string]: any
   }
 }
 
