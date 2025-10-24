@@ -24,18 +24,11 @@ Next.js API routes are powerful, but they don’t offer a clean way to share log
 
 ## Quick Start
 
-Install one or both packages depending on your needs:
+Use one or both packages depending on your needs:
 
-```bash
-# Core package (required)
-npm install @eodeluga/next-middy-core
-
-# Optional Zod integration
-npm install @eodeluga/next-middy-zod zod
-
-# Everything
-npm install @eodeluga/next-middy
-```
+- **next-middy-core** – the core lifecycle engine, error handling, and type system **(required)**
+- **next-middy-zod** – optional add-on for Zod schema validation  
+- **next-middy** – umbrella package that re-exports both for convenience  
 
 Then wrap your Next.js API route handler:
 
@@ -120,16 +113,6 @@ nextMiddy(handler)
 4. **onError** – runs when an error occurs anywhere in the chain  
 
 Everything is fully typed — ensuring middleware input/output shapes are inferred automatically.
-
----
-
-## Packages
-
-- **@eodeluga/next-middy-core** – the core lifecycle engine, error handling, and type system  
-- **@eodeluga/next-middy-zod** – optional add-on for Zod schema validation  
-- **next-middy** – umbrella package that re-exports both for convenience  
-
-All can be used independently or together.
 
 ---
 
