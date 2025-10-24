@@ -1,0 +1,66 @@
+import { describe, it, expect } from 'vitest'
+import { z } from 'zod'
+import { zodValidatorMiddle } from '../../packages/zod/src/zod-validator.middle'
+import { nextMiddy } from '../../packages/core/src/utils/next-middy.util'
+import { createMockContext } from '../utils/mock.util'
+
+describe('zodValidatorMiddle', () => {
+  const inputSchema = z.object({
+    name: z.string(),
+    age: z.number().min(0),
+  })
+
+  const outputSchema = z.object({
+    message: z.string(),
+  })
+
+  it('validates input and attaches parsed data', async () => {
+    type Input = z.infer<typeof inputSchema>
+    type Output = z.infer<typeof outputSchema>
+
+    const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: 46 })
+
+    let output = null
+    const handler = nextMiddy<Input, Output>(async (req, res) => {
+      const { name, age } = req.input
+      output = { message: `${name} is ${age}` }
+      return output
+    }).use(zodValidatorMiddle(inputSchema, outputSchema))
+
+    await handler(req, res)
+
+    expect(req.input).toEqual({ name: 'Eugene', age: 46 })
+    expect(res.output).toEqual(output)
+  })
+
+  it('throws a validation error for invalid input', async () => {
+    type Input = z.infer<typeof inputSchema>
+    type Output = z.infer<typeof outputSchema>
+
+    const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: -10 })
+
+    const handler = nextMiddy<Input, Output>(async (req, res) => {
+      return res.json({ message: 'should not reach' })
+    }).use(zodValidatorMiddle(inputSchema, outputSchema))
+
+    await expect(handler(req, res)).rejects.toThrowError(/input/)
+  })
+
+  it('throws a validation error for invalid output', async () => {
+    type Input = z.infer<typeof inputSchema>
+    type Output = z.infer<typeof outputSchema>
+
+    const badOutputSchema = outputSchema.omit({
+      message: true
+    }) as z.ZodObject<{ message: z.ZodString}>
+    
+    const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: 46 })
+
+    const handler = nextMiddy<Input, { message: string }>(async (req, res) => {
+      const { name } = req.input
+      return res.json({ message: `Hello ${name}` })
+    }).use(zodValidatorMiddle(inputSchema, badOutputSchema))
+
+    await expect(handler(req, res)).rejects.toThrowError(/output/)
+  })
+})
