@@ -40,14 +40,27 @@ const createMockContext = <I, O>(input: I) => {
 }
 
 /**
- * Makes a read /write version of res.headersSent
- * @param res NextMiddyApiResponse<T>
+ * Adds a writable `headersSent` property to a mock Next.js response object.
+ *
+ * The real Next.js `ServerResponse` has a read-only `headersSent` getter, 
+ * but for testing middleware flow we often need to simulate its behaviour. 
+ * This helper redefines the property as a writable boolean, allowing 
+ * tests to toggle its value to emulate different response states.
+ *
+ * @template T - The response output type.
+ * @param res - The mock response object to modify.
+ * @throws If the property cannot be redefined (e.g. frozen object).
  */
-function markHeadersSentRW<T>(
+function makeHeadersSentWritable<T>(
   res: NextMiddyApiResponse<T>,
   // value: boolean
 ): asserts res is NextMiddyApiResponse<T> & { headersSent: boolean } {
-  Object.defineProperty(res, 'headersSent', { value: false, configurable: true })
+  Object.defineProperty(res, 'headersSent', {
+    value: false,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  })
 }
 
-export { createMockContext, markHeadersSentRW }
+export { createMockContext, makeHeadersSentWritable }
