@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse, NextMiddyLifecycle } from '../../packages/core/src/utils/next-middy.util'
-import { createMockContext, markHeadersSentRW } from '../utils/mock.util'
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/core/src/utils/next-middy.util'
+import { createMockContext, makeHeadersSentWritable } from '../utils/mock.util'
 
-describe.only('nextMiddy lifecycle', () => {
+describe('nextMiddy lifecycle', () => {
   it('runs middleware in before → handler → after order', async () => {
     type Input = { name: string }
     type Output = { message: string }
@@ -20,7 +20,7 @@ describe.only('nextMiddy lifecycle', () => {
       res: NextMiddyApiResponse<Output>
     ) => void
 
-    const handler = nextMiddy<Input, Output>((req, res) => {
+    const handler = nextMiddy<Input, Output>((req, _) => {
       order.push('handler')
       return { message: `Hello ${req.input.name}` }
     })
@@ -39,15 +39,14 @@ describe.only('nextMiddy lifecycle', () => {
     
     const { req, res } = createMockContext<Input, Output>({ skip: true })
 
-    markHeadersSentRW(res)
+    makeHeadersSentWritable(res)
     res.headersSent = false
-    debugger
     
     const handler = nextMiddy((_, res) => {
       throw new Error('should not reach handler')
     }).use({
       before: () => {
-        markHeadersSentRW(res)
+        makeHeadersSentWritable(res)
         res.headersSent = true
       },
       after: () => {
@@ -56,7 +55,7 @@ describe.only('nextMiddy lifecycle', () => {
     })
 
     await handler(req, res)
-    debugger
+
     expect(res.headersSent).toBe(true)
   })
 
@@ -66,11 +65,11 @@ describe.only('nextMiddy lifecycle', () => {
     
     const { req, res } = createMockContext<Input, Output>({})
 
-    const onError = vi.fn(async (err, req) => {
+    const onError = vi.fn((err, req) => {
       req.internal.captured = err.code
     })
 
-    const handler = nextMiddy<Input, Output>(async () => {
+    const handler = nextMiddy<Input, Output>(() => {
       throw Object.assign(new Error('Boom!'), { code: 'Exploded', status: 500 })
     }).use({ onError })
 
@@ -106,7 +105,7 @@ describe.only('nextMiddy lifecycle', () => {
 
     const handler = nextMiddy<Input, Output>(async (req, res) => {
       sequence.push('handler')
-      return res.json({ result: req.input.value })
+      return { result: req.input.value }
     })
       .use(addFive)
       .use(double)
