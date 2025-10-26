@@ -24,8 +24,6 @@ Next.js API routes are powerful, but they don’t offer a clean way to share log
 
 ## Quick Start
 
-Use one or both packages depending on your needs:
-
 - **next-middy-core** – the core lifecycle engine, error handling, and type system **(required)**
 - **next-middy-zod** – optional add-on for Zod schema validation  
 - **next-middy** – umbrella package that re-exports both for convenience  
