@@ -34,8 +34,8 @@ Then wrap your Next.js API route handler:
 
 ```ts
 // pages/api/example.ts
-import { nextMiddy, errorMiddle } from '@eodeluga/next-middy-core'
-import { zodValidatorMiddle } from '@eodeluga/next-middy-zod'
+import { nextMiddy, errorMiddle } from 'next-middy-core'
+import { zodValidatorMiddle } from 'next-middy-zod'
 import { z } from 'zod'
 
 const inputSchema = z.object({
@@ -75,7 +75,7 @@ Each middleware implements one or more lifecycle hooks:
 `before`, `after`, and `onError`.
 
 ```ts
-import type { NextMiddyLifecycle } from '@eodeluga/next-middy-core'
+import type { NextMiddyLifecycle } from 'next-middy-core'
 
 export const timingMiddle: NextMiddyLifecycle<unknown, unknown> = {
   before: (req) => {
