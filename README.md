@@ -11,7 +11,7 @@ Inspired by [`middy`](https://middy.js.org/) for AWS Lambda, `next-middy` has be
 
 ## Why next-middy?
 
-Next.js API routes are powerful, but they don’t offer a clean way to share logic between handlers, validation, logging, or error handling often end up copy-pasted across files.
+Next.js API routes are powerful, but they lack a clean way to share logic between handlers. Validation, logging, and error handling often end up copy-pasted across files.
 
 `next-middy` solves that by introducing a **structured middleware pipeline**:
 
@@ -28,7 +28,20 @@ Next.js API routes are powerful, but they don’t offer a clean way to share log
 - **next-middy-zod** – optional add-on for Zod schema validation  
 - **next-middy** – umbrella package that re-exports both for convenience  
 
-Then wrap your Next.js API route handler:
+---
+
+## How It Works
+
+`next-middy` wraps your API handler and executes middleware in sequence:
+
+1. **before** – runs before your handler, can mutate `req.input`  
+2. **handler** – your actual API logic  
+3. **after** – runs after handler success, can modify `res.output`  
+4. **onError** – runs when an error occurs anywhere in the chain  
+
+Everything is fully typed — ensuring middleware input/output shapes are inferred automatically.
+
+**Example**
 
 ```ts
 // pages/api/example.ts
@@ -101,18 +114,14 @@ nextMiddy(handler)
 
 ---
 
-## How It Works
+## Controlling Error Response Behaviour
 
-`next-middy` wraps your API handler and executes middleware in sequence:
+| Environment                 | Response shape                            | Description                                 |
+| --------------------------- | ----------------------------------------- | ------------------------------------------- |
+| `NODE_ENV=development`      | Full `EnrichedError` object               | Includes message, stack trace, and metadata |
+| `NODE_ENV=production`       | `{ name, code }`                          | Sanitised; omits internal details           |
+| `MIDDY_VERBOSE_ERRORS=true` | Full `EnrichedError` (in any environment) | Override for temporary diagnostics          |
 
-1. **before** – runs before your handler, can mutate `req.input`  
-2. **handler** – your actual API logic  
-3. **after** – runs after handler success, can modify `res.output`  
-4. **onError** – runs when an error occurs anywhere in the chain  
-
-Everything is fully typed — ensuring middleware input/output shapes are inferred automatically.
-
----
 
 ## ⚖️ License
 
