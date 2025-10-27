@@ -19,7 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "next-middy-core": "workspace:*"
+    "next-middy-core": "*"
   },
   "peerDependencies": {
     "next": ">=13.0.0",

@@ -7,16 +7,12 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "packages/next-middy-core",
-    "packages/next-middy"
+    "packages/*"
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "npx tsc -b",
+    "build": "tsc -b",
     "clean": "rm -rf packages/**/dist .tsbuildinfo",
-    "build:core": "npm run build -w packages/next-middy-core",
-    "build:main": "npm run build -w packages/next-middy",
-    "prepare": "npm run build",
     "test": "vitest run"
   },
   "devDependencies": {
