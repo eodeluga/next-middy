@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/zod" }
+    { "path": "./packages/next-middy-core" },
+    { "path": "./packages/next-middy" }
   ]
 }

@@ -11,8 +11,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist", "tests", "node_modules"]
+    "allowSyntheticDefaultImports": true,
+    "incremental": true
+  }
 }

@@ -4,6 +4,9 @@
     "tests/**/*.ts"
   ],
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "types": ["vitest/globals", "node"]
   }
 }
