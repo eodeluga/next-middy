@@ -160,10 +160,17 @@ const executeHandler = async <I, O>(
 
     // Fallback only if no middleware responded
     if (!res.headersSent) {
-      res.status(normalisedError.status).json({
-        error: normalisedError.code,
-        message: normalisedError.message,
-      })
+      const isDev = process.env.NODE_ENV === 'development'
+      const verbose = process.env.MIDDY_VERBOSE_ERRORS === 'true'
+
+      if (isDev || verbose) {
+        res.status(normalisedError.status).json(normalisedError)
+      } else {
+        res.status(normalisedError.status).json({
+          name: normalisedError.name,
+          code: normalisedError.code,
+        })
+      }
     }
   }
 }

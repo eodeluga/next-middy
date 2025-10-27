@@ -22,10 +22,17 @@ export const errorMiddle: NextMiddyLifecycle<unknown, unknown> = {
     req.internal.error = enrichedError
 
     console.error(JSON.stringify(enrichedError, null, 2))
+    
+    const isDev = process.env.NODE_ENV === 'development'
+    const verbose = process.env.MIDDY_VERBOSE_ERRORS === 'true'
 
-    res.status(enrichedError.status).json({
-      error: enrichedError.code,
-      message: enrichedError.message,
-    })
+    if (isDev || verbose) {
+      res.status(enrichedError.status).json(enrichedError)
+    } else {
+      res.status(enrichedError.status).json({
+        code: enrichedError.code,
+        name: enrichedError.name,
+      })
+    }
   },
 }
