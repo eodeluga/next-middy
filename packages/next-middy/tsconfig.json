@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "../../.tsbuildinfo/next-middy.tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "next-middy-core": ["../next-middy-core/src"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "references": [{ "path": "../next-middy-core" }]
+}
