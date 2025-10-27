@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/core/src/utils/next-middy.util'
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/next-middy-core/src'
 import { createMockContext } from '../utils/mock.util'
 
 describe('nextMiddy pass-through', () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { z } from 'zod'
-import { zodValidatorMiddle } from '../../packages/zod/src/zod-validator.middle'
-import { nextMiddy } from '../../packages/core/src/utils/next-middy.util'
+import { zodValidatorMiddle } from '../../packages/next-middy/src'
+import { nextMiddy } from '../../packages/next-middy-core/src'
 import { createMockContext } from '../utils/mock.util'
 
 describe('zodValidatorMiddle', () => {

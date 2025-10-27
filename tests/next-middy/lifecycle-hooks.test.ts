@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/core/src/utils/next-middy.util'
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/next-middy-core/src'
 import { createMockContext, makeHeadersSentWritable } from '../utils/mock.util'
 
 describe('nextMiddy lifecycle', () => {
