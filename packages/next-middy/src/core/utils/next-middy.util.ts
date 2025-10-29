@@ -15,7 +15,12 @@ interface NextMiddyError extends Error {
  */
 interface NextMiddyApiRequest<I> extends NextApiRequest {
   input: I
+  /**
+   * This property is a scratch pad for middleware, and is intentionally untyped to avoid casts
+   */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   internal: Record<string, any>
+  /* eslint-enable @typescript-eslint/no-explicit-any */
   method?: string
   url?: string
 }
@@ -28,7 +33,12 @@ interface NextMiddyApiResponse<O> extends NextApiResponse<O> {
   output?: O
   headersSent: boolean
   status: (code: number) => this
+  /**
+   * This mirrors `NextApiResponse['json']` which also accepts `any` in Next.js types:
+  */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   json: (body: any) => this
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 /**
@@ -54,8 +64,16 @@ interface NextMiddyLifecycle<I, O> {
    */
   onError?: (
     err: NextMiddyError,
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    /**
+    * `req.input` is untyped to avoid casts.
+    */
     req: NextMiddyApiRequest<any>,
+    /**
+    * `res.output` is untyped to avoid casts.
+    */
     res: NextMiddyApiResponse<any>
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   ) => Promise<void> | void
 }
 
@@ -158,7 +176,7 @@ const executeHandler = async <I, O>(
     for (const middleware of [...middlewares].reverse()) {
       if (middleware.onError) {
         try {
-          await middleware.onError(normalisedError, req, res as NextMiddyApiResponse<any>)
+          await middleware.onError(normalisedError, req, res)
         } catch (middlewareError) {
           console.error('Middleware onError failed:', middlewareError)
         }
