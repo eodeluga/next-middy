@@ -25,7 +25,7 @@ Next.js API routes are powerful, but they lack a clean way to share logic betwee
 ## Quick Start
 
 - **next-middy/core** – the core lifecycle engine, error handling, and type system **(required)**
-- **next-middy/zod** – optional add-on for Zod schema validation  
+- **next-middy/zod** – optional add-on for Zod schema validation middleware
 - **next-middy** – umbrella package that re-exports both for convenience  
 
 ---
