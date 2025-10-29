@@ -3,8 +3,13 @@
   "compilerOptions": {
     "outDir": "../../dist/next-middy",
     "rootDir": "./src",
-    "noEmit": false
+    "baseUrl": "../../",
+    "paths": {
+      "next-middy": ["packages/next-middy/src/index.ts"],
+      "next-middy/core": ["packages/next-middy/src/core/index.ts"],
+      "next-middy/zod": ["packages/next-middy/src/zod/index.ts"]
+    }
   },
   "include": ["src"],
-  "exclude": ["**/*.test.ts"]
+  "exclude": ["../../dist", "../../node_modules", "**/*.test.ts"]
 }
