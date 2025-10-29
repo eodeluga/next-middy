@@ -1,7 +1,26 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./packages/next-middy-core" },
-    { "path": "./packages/next-middy" }
-  ]
+  "include": ["packages/next-middy/src"],
+  "exclude": ["tests", "dist", "node_modules"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2020"],
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist/next-middy",
+    "rootDir": "./packages/next-middy/src",
+    "baseUrl": ".",
+    "paths": {
+      "next-middy": ["packages/next-middy/src/index.ts"],
+      "next-middy/core": ["packages/next-middy/src/core/index.ts"],
+      "next-middy/zod": ["packages/next-middy/src/zod/index.ts"]
+    }
+  }
 }

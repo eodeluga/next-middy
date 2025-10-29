@@ -1,7 +1,7 @@
 /**
-* Entry point for Zod integration in next-middy.
-* Re-exports all validation middleware and related error classes.
-*/
+ * Zod integration layer for next-middy/zod.
+ * Exposes schema validation middleware and related errors.
+ */
 export * from './zod-validator.middle.js'
 export * from './zod-error.middle.js'
 export * from './zod-validation.error.js'

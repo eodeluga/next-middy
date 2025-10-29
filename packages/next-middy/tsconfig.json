@@ -1,16 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "composite": true,
-    "incremental": true,
-    "tsBuildInfoFile": "../../.tsbuildinfo/next-middy.tsbuildinfo",
-    "baseUrl": ".",
-    "paths": {
-      "next-middy-core": ["../next-middy-core/src"]
-    }
+    "outDir": "../../dist/next-middy",
+    "rootDir": "./src",
+    "noEmit": false
   },
-  "include": ["src/**/*.ts"],
-  "references": [{ "path": "../next-middy-core" }]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts"]
 }

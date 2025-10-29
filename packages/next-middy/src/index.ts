@@ -1,6 +1,6 @@
 /**
- * Entry point for next-middy
- * Exports the core middleware system plus Zod-powered schema validation.
+ * Root export for next-middy.
+ * Combines core framework and optional Zod integration.
  */
-export * from 'next-middy-core'
+export * from './core/index.js'
 export * from './zod/index.js'
