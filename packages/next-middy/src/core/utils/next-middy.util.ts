@@ -75,7 +75,7 @@ interface NextMiddyHandler<I, O> {
 /**
  * Factory that wraps a Next.js API handler with before/after/error middleware support.
  */
-const nextMiddy = <I extends object = object, O extends object = object>(
+const nextMiddy = <I extends object = object, O extends object | unknown = unknown>(
   handler: NextMiddyHandlerFn<I, O>
 ): NextMiddyHandler<I, O> => {
   const middlewares: NextMiddyLifecycle<I, O>[] = []

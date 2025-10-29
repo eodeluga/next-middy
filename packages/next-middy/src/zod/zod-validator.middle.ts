@@ -7,8 +7,8 @@ import { ZodValidationError } from 'next-middy/zod'
  * Automatically parses and attaches validated data to `req.input` and `res.output`.
  */
 export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAny>(
-  inputSchema?: I,
-  outputSchema?: O
+  inputSchema: I,
+  outputSchema?: O | undefined
 ): NextMiddyLifecycle<z.infer<I>, z.infer<O>> => ({
   // Validates the request input
   before: (req: NextMiddyApiRequest<z.infer<I>>) => {
