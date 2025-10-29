@@ -34,5 +34,5 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
 
     // Attach validated output
     res.output = parsed.data
-  }
+  },
 })
