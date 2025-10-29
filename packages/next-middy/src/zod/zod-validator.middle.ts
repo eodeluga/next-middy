@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import type { NextMiddyApiRequest, NextMiddyApiResponse, NextMiddyLifecycle } from 'next-middy-core'
-import { ZodValidationError } from './zod-validation.error.js'
+import { NextMiddyApiRequest, NextMiddyApiResponse, NextMiddyLifecycle } from 'next-middy/core'
+import { ZodValidationError } from 'next-middy/zod'
 
 /**
  * Middleware for validating request input and response output using Zod schemas.
