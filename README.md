@@ -24,8 +24,8 @@ Next.js API routes are powerful, but they lack a clean way to share logic betwee
 
 ## Quick Start
 
-- **next-middy-core** – the core lifecycle engine, error handling, and type system **(required)**
-- **next-middy-zod** – optional add-on for Zod schema validation  
+- **next-middy/core** – the core lifecycle engine, error handling, and type system **(required)**
+- **next-middy/zod** – optional add-on for Zod schema validation  
 - **next-middy** – umbrella package that re-exports both for convenience  
 
 ---
@@ -45,8 +45,8 @@ Everything is fully typed — ensuring middleware input/output shapes are inferr
 
 ```ts
 // pages/api/example.ts
-import { nextMiddy, errorMiddle } from 'next-middy-core'
-import { zodValidatorMiddle } from 'next-middy-zod'
+import { nextMiddy, errorMiddle } from 'next-middy/core'
+import { zodValidatorMiddle } from 'next-middy/zod'
 import { z } from 'zod'
 
 const inputSchema = z.object({
@@ -86,7 +86,7 @@ Each middleware implements one or more lifecycle hooks:
 `before`, `after`, and `onError`.
 
 ```ts
-import type { NextMiddyLifecycle } from 'next-middy-core'
+import type { NextMiddyLifecycle } from 'next-middy/core'
 
 export const timingMiddle: NextMiddyLifecycle<unknown, unknown> = {
   before: (req) => {
