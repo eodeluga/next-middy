@@ -1,5 +1,4 @@
-import { EnrichedError } from '../errors/enriched.error.js'
-import { NextMiddyLifecycle } from '../utils/next-middy.util.js'
+import { EnrichedError, NextMiddyLifecycle } from 'next-middy/core'
 
 /**
  * Generic error logging middleware.

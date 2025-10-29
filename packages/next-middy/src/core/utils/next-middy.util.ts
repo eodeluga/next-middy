@@ -11,21 +11,24 @@ interface NextMiddyError extends Error {
 }
 
 /**
- * Extended request object exposing parsed input and middleware state.
+ * Extended Next.js request object used internally by next-middy.
  */
 interface NextMiddyApiRequest<I> extends NextApiRequest {
   input: I
-  internal: {
-    error?: NextMiddyError
-    [key: string]: any
-  }
+  internal: Record<string, any>
+  method?: string
+  url?: string
 }
 
 /**
- * Extended response object exposing structured output.
+ * Extended Next.js response object used internally by next-middy.
+ * Adds convenience fields and explicitly redefines known runtime props.
  */
-interface NextMiddyApiResponse<O> extends NextApiResponse {
+interface NextMiddyApiResponse<O> extends NextApiResponse<O> {
   output?: O
+  headersSent: boolean
+  status: (code: number) => this
+  json: (body: any) => this
 }
 
 /**
@@ -37,19 +40,23 @@ interface NextMiddyLifecycle<I, O> {
    * Runs before the main handler executes.
    * Can read or modify `req.input` and perform setup or validation logic.
    */
-  before?: (req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void
+  before?: (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>) => Promise<void> | void
 
   /**
    * Runs after the main handler completes successfully.
    * Receives the handler output for additional transformation or side effects.
    */
-  after?: (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>, data: O) => Promise<void> | void
+  after?: (req: NextMiddyApiRequest<I>, res: NextMiddyApiResponse<O>, output: O) => Promise<void> | void
 
   /**
    * Runs if an exception occurs during `before`, `handler`, or `after`.
    * Used for logging, cleanup, or consistent error response handling.
    */
-  onError?: (err: NextMiddyError, req: NextMiddyApiRequest<I>, res: NextApiResponse) => Promise<void> | void
+  onError?: (
+    err: NextMiddyError,
+    req: NextMiddyApiRequest<any>,
+    res: NextMiddyApiResponse<any>
+  ) => Promise<void> | void
 }
 
 /**
@@ -151,7 +158,7 @@ const executeHandler = async <I, O>(
     for (const middleware of [...middlewares].reverse()) {
       if (middleware.onError) {
         try {
-          await middleware.onError(normalisedError, req, res)
+          await middleware.onError(normalisedError, req, res as NextMiddyApiResponse<any>)
         } catch (middlewareError) {
           console.error('Middleware onError failed:', middlewareError)
         }
