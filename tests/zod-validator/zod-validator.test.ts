@@ -1,8 +1,7 @@
-import { describe, it, expect } from 'vitest'
 import { z } from 'zod'
-import { zodValidatorMiddle } from '../../packages/next-middy/src'
-import { nextMiddy } from '../../packages/next-middy-core/src'
-import { createMockContext } from '../utils/mock.util'
+import { zodValidatorMiddle } from 'next-middy/zod'
+import { nextMiddy } from 'next-middy/core'
+import { createMockContext } from 'tests/utils/mock.util.js'
 
 describe('zodValidatorMiddle', () => {
   const inputSchema = z.object({
@@ -41,8 +40,8 @@ describe('zodValidatorMiddle', () => {
 
     const { req, res } = createMockContext<Input, Output>({ name: 'Eugene', age: -10 })
 
-    const handler = nextMiddy<Input, Output>((_, res) => {
-      return res.json({ message: 'should not reach' })
+    const handler = nextMiddy<Input, Output>(() => {
+      return { message: 'should not reach' }
     })
       .use(zodValidatorMiddle(inputSchema, outputSchema))
 

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/next-middy-core/src'
-import { createMockContext, makeHeadersSentWritable } from '../utils/mock.util'
+
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from 'next-middy/core'
+import { createMockContext, makeHeadersSentWritable } from '../utils/mock.util.js'
 
 describe('nextMiddy lifecycle', () => {
   it('runs middleware in before → handler → after order', async () => {
@@ -42,7 +42,7 @@ describe('nextMiddy lifecycle', () => {
     makeHeadersSentWritable(res)
     res.headersSent = false
     
-    const handler = nextMiddy((_, res) => {
+    const handler = nextMiddy<Input, Output>(() => {
       throw new Error('should not reach handler')
     }).use({
       before: () => {

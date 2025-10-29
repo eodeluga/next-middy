@@ -3,7 +3,14 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": "../",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "baseUrl": "../",
+    "paths": {
+      "next-middy": ["packages/next-middy/src/index.ts"],
+      "next-middy/core": ["packages/next-middy/src/core/index.ts"],
+      "next-middy/zod": ["packages/next-middy/src/zod/index.ts"]
+    }
   },
-  "include": ["**/*.ts"]
+  "include": ["./**/*.ts"],
+  "exclude": ["../dist", "../node_modules"]
 }

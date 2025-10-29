@@ -1,4 +1,4 @@
-import type { NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/core/src/utils/next-middy.util'
+import type { NextMiddyApiRequest, NextMiddyApiResponse } from 'next-middy-core'
 
 /** 
  * Mock minimal Next.js request/response

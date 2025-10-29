@@ -1,6 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/next-middy-core/src'
-import { createMockContext } from '../utils/mock.util'
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from 'next-middy/core'
+import { createMockContext } from 'tests/utils/mock.util.js'
 
 describe('nextMiddy pass-through', () => {
   it('passes req.input and res.output unchanged when no middleware used', async () => {

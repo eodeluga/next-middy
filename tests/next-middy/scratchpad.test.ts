@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest'
-import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from '../../packages/next-middy-core/src'
-import { createMockContext } from '../utils/mock.util'
+import { nextMiddy, NextMiddyApiRequest, NextMiddyApiResponse } from 'next-middy/core'
+import { createMockContext } from 'tests/utils/mock.util.js'
 
 describe('nextMiddy scratchpad', () => {
   beforeAll(() => {
@@ -99,7 +98,7 @@ describe('nextMiddy scratchpad', () => {
     }
 
     const onError = {
-      onError: (err: Error & { code: string }, req: NextMiddyApiRequest<Input>) => {
+      onError: (err: Error & { code: string }, req: NextMiddyApiRequest<Input>, res: NextMiddyApiResponse<Output>) => {
         order.push('onError')
         req.internal.errorCode = err.code
       },
