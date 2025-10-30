@@ -12,9 +12,10 @@
   "sideEffects": false,
   "scripts": {
     "bootstrap": "echo '📦 Installing workspace deps…' && yarn install --silent && echo '✅ Dependencies linked.'",
-    "build": "yarn run clean && yarn run bootstrap && echo '🏗️ Building…' && tsc -p tsconfig.json && echo '✅ Build complete.'",
-    "clean": "echo '🧹 Cleaning…' && find . -type d \\( -name 'node_modules' -o -name '.tsbuildinfo' -o -name 'dist' -o -name 'coverage' -o -name '.vitest-cache' \\) -prune -exec rm -rf {} + && find . -type f \\( -name 'yarn.lock' \\) -delete && echo '✅ Clean complete.'",
+    "build": "echo '🏗️ Building…' && tsc -p packages/next-middy/tsconfig.json && echo '✅ Build complete.'",
+    "clean": "echo '🧹 Cleaning…' && find . -type d \\( -name 'node_modules' -o -name '.tsbuildinfo' -o -name 'coverage' -o -name '.vitest-cache' -o -name 'dist' \\) -prune -exec rm -rf {} + && find . -type f -name 'yarn.lock' -delete && echo '✅ Clean complete.'",
     "lint": "eslint . --ext .ts",
+    "rebuild": "yarn run clean && yarn install && yarn run build",
     "test": "vitest run"
   },
   "devDependencies": {

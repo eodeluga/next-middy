@@ -1,14 +1,17 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/next-middy",
+    "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "../../",
     "paths": {
       "next-middy": ["packages/next-middy/src/index.ts"],
       "next-middy/core": ["packages/next-middy/src/core/index.ts"],
       "next-middy/zod": ["packages/next-middy/src/zod/index.ts"]
-    }
+    },
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"],
   "exclude": ["../../dist", "../../node_modules", "**/*.test.ts"]
