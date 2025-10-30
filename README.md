@@ -5,7 +5,7 @@
 # next-middy
 
 **Type-safe, composable middleware for Next.js API routes.**  
-Inspired by [`middy`](https://middy.js.org/) for AWS Lambda, `next-middy` has been designed to natively support the [Next.js](https://nextjs.org/) ecosystem, with modern TypeScript, strict generics, and a clean lifecycle pattern.
+Inspired by [`middy`](https://middy.js.org/) for AWS Lambda, next-middy has been designed to natively support the [Next.js](https://nextjs.org/) ecosystem, with modern TypeScript, strict generics, and a clean lifecycle pattern.
 
 ---
 
@@ -13,7 +13,7 @@ Inspired by [`middy`](https://middy.js.org/) for AWS Lambda, `next-middy` has be
 
 Next.js API routes are powerful, but they lack a clean way to share logic between handlers. Validation, logging, and error handling often end up copy-pasted across files.
 
-`next-middy` solves that by introducing a **structured middleware pipeline**:
+next-middy solves that by introducing a **structured middleware pipeline**:
 
 - Reusable “before”, “after”, and “onError” hooks  
 - Fully typed `req.input` and `res.output` contracts  
@@ -23,6 +23,8 @@ Next.js API routes are powerful, but they lack a clean way to share logic betwee
 ---
 
 ## Quick Start
+
+`npm install next-middy`
 
 - **next-middy/core** – the core lifecycle engine, error handling, and type system **(required)**
 - **next-middy/zod** – optional add-on for Zod schema validation middleware
@@ -111,6 +113,43 @@ nextMiddy(handler)
   .use(timingMiddle)
   .use(errorMiddle)
 ```
+
+---
+
+## How to Build
+
+To build the package from source:
+
+1. Clean workspace (optional)
+
+    `yarn clean`
+
+2. Install dependencies
+
+    `yarn bootstrap`
+
+3. Build next-middy
+
+    `yarn build`
+
+This compiles `packages/next-middy/src` to `packages/next-middy/dist`, ready for local linking or publication.
+
+**Rebuilding from scratch**
+
+`yarn rebuild`
+
+That command runs the full clean + install + build sequence, ensuring a pristine dist/ output.
+
+If you’re testing locally in another project, you can link it via:
+
+```
+cd packages/next-middy
+npm link
+```
+
+**then in your target project**
+
+`npm link next-middy`
 
 ---
 
