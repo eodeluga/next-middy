@@ -3,7 +3,7 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: ['./tsconfig.json'],
+    project: ['./packages/*/tsconfig.json'],
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint', 'import'],
@@ -59,7 +59,7 @@ module.exports = {
     'import/resolver': {
       // Let ESLint understand TypeScript path aliases
       typescript: {
-        project: ['./tsconfig.json'],
+        project: ['./packages/*/tsconfig.json'],
       },
       node: {
         extensions: ['.js', '.ts'],
