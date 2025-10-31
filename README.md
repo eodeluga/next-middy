@@ -46,38 +46,56 @@ Everything is fully typed — ensuring middleware input/output shapes are inferr
 **Example**
 
 ```ts
-// pages/api/example.ts
-import { nextMiddy, errorMiddle } from 'next-middy/core'
-import { zodValidatorMiddle } from 'next-middy/zod'
+// pages/api/example/[name].ts
 import { z } from 'zod'
+import { nextMiddy } from 'next-middy/core'
+import { zodErrorMiddle, zodValidatorMiddle } from 'next-middy/zod'
 
 const inputSchema = z.object({
-  name: z.string().min(1),
+  name: z
+    .string()
+    .refine((val) => /^[A-Za-z]+$/.test(val), {
+      message: 'Name must contain only alphabetical characters',
+    }),
 })
 
+// Optional output validation schema
 const outputSchema = z.object({
-  message: z.string(),
+  message: z
+    .string()
+    .refine((val) => val.startsWith('Hi '), {
+      message: 'Message must start with "Hi "',
+    }),
 })
 
-const handler = nextMiddy(async (req, res) => {
+type InputType = z.infer<typeof inputSchema>
+type OutputType = z.infer<typeof outputSchema>
+
+export default nextMiddy<InputType, OutputType>((req) => {
+  // Randomly simulate an invalid response
   const { name } = req.input
-  const message = `Hello, ${name}!`
+  const shouldFail = Math.random() < 0.5
+  const message = shouldFail ? `${name}` : `Hi ${name}`
+
   return { message }
 })
   .use(zodValidatorMiddle(inputSchema, outputSchema))
-  .use(errorMiddle)
-
-export default handler
+  .use(zodErrorMiddle)
 ```
 
 ### Result
-- Invalid requests return:
+- Validation errors:
   ```json
-  { "error": "ValidationError", "issues": [...] }
+  // A name containing a number
+  {"code":"ValidationError","name":"ZodValidationError","status":400,"details":[{"code":"custom","path":["name"],"message":"Name must contain only alphabetical characters"}],"method":"GET","timestamp":"2025-10-31T01:03:01.572Z","url":"/api/example/Trevor1"}
+  ```
+  ```json
+  // A message that doesn't contain 'Hi'
+  {"code":"ValidationError","name":"ZodValidationError","status":400,"details":[{"code":"custom","path":["message"],"message":"Message must start with \"Hi \""}],"method":"GET","timestamp":"2025-10-31T00:58:52.923Z","url":"/api/example/Trevor"}
   ```
 - Successful requests return:
   ```json
-  { "message": "Hello, Eugene!" }
+  { "message": "Hi, Eugene!" }
   ```
 
 ---
@@ -88,20 +106,24 @@ Each middleware implements one or more lifecycle hooks:
 `before`, `after`, and `onError`.
 
 ```ts
-import type { NextMiddyLifecycle } from 'next-middy/core'
+import type { NextMiddyLifecycle, NextMiddyApiRequest } from 'next-middy/core'
 
-export const timingMiddle: NextMiddyLifecycle<unknown, unknown> = {
-  before: (req) => {
+export const timingMiddle: NextMiddyLifecycle<any, any> = {
+  before: (req: NextMiddyApiRequest<any>) => {
+    if (!req.internal) {
+      req.internal = {} as any
+    }
+
     req.internal.startTime = Date.now()
   },
 
-  after: (_, res) => {
-    const duration = Date.now() - (res.req.internal.startTime ?? 0)
+  after: (req: NextMiddyApiRequest<any>) => {
+    const duration = Date.now() - (req.internal?.startTime ?? 0)
     console.log(`Request completed in ${duration}ms`)
   },
 
   onError: (error) => {
-    console.error('Request failed:', error)
+    console.error('Request failed: ', error)
   },
 }
 ```
@@ -132,15 +154,13 @@ To build the package from source:
 
     `yarn build`
 
-This compiles `packages/next-middy/src` to `packages/next-middy/dist`, ready for local linking or publication.
-
 **Rebuilding from scratch**
 
 `yarn rebuild`
 
 That command runs the full clean + install + build sequence, ensuring a pristine dist/ output.
 
-If you’re testing locally in another project, you can link it via:
+If you’re making changes to next-middy, you can test these against another project by linking build files:
 
 ```
 cd packages/next-middy
