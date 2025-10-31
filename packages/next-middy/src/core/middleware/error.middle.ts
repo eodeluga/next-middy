@@ -5,8 +5,9 @@ import { EnrichedError, NextMiddyLifecycle } from 'next-middy/core'
  * Captures and serialises all thrown errors.
  * Stores a raw copy in req.internal.error, and sends an HTTP response.
  */
-export const errorMiddle: NextMiddyLifecycle<unknown, unknown> = {
-  onError: async (error, req, res) => {
+ /* eslint-disable @typescript-eslint/no-explicit-any */
+export const errorMiddle: NextMiddyLifecycle<any, any> = {
+  onError: (error, req, res) => {
     if (res.headersSent) { return }
 
     const enrichedError = new EnrichedError({
@@ -28,10 +29,7 @@ export const errorMiddle: NextMiddyLifecycle<unknown, unknown> = {
     if (isDev || verbose) {
       res.status(enrichedError.status).json(enrichedError)
     } else {
-      res.status(enrichedError.status).json({
-        code: enrichedError.code,
-        name: enrichedError.name,
-      })
+      res.status(enrichedError.status).json({ code: enrichedError.code })
     }
   },
 }

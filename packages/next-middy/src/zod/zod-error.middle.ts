@@ -6,10 +6,11 @@ import { ZodValidationError } from 'next-middy/zod'
  * Handles schema validation errors thrown by Zod.
  * Extends generic error behaviour by attaching validation details and paths.
  */
-export const zodErrorMiddle: NextMiddyLifecycle<unknown, unknown> = {
-  onError: async (error, req, res) => {
+ /* eslint-disable @typescript-eslint/no-explicit-any */
+export const zodErrorMiddle: NextMiddyLifecycle<any, any> = {
+  onError: (error, req, res) => {
     if (res.headersSent) { return }
-    if (!(error instanceof ZodValidationError)) { return }
+    if (!(error instanceof ZodValidationError) && error.name !== 'ZodValidationError') { return }
 
     const enrichedError = new EnrichedError({
       name: error.name ?? 'ZodValidationError',
@@ -26,9 +27,13 @@ export const zodErrorMiddle: NextMiddyLifecycle<unknown, unknown> = {
 
     console.error(JSON.stringify(enrichedError, null, 2))
 
-    res.status(enrichedError.status).json({
-      error: enrichedError.code,
-      issues: error.details,
-    })
+    const isDev = process.env.NODE_ENV === 'development'
+    const verbose = process.env.MIDDY_VERBOSE_ERRORS === 'true'
+
+    if (isDev || verbose) {
+      res.status(enrichedError.status).json(enrichedError)
+    } else {
+      res.status(enrichedError.status).json({ code: enrichedError.code })
+    }
   },
 }
