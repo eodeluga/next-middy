@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build",
+    "prepack": "cp ../../README.md . && cp ../../LICENSE . && npm run build",
+    "postpack": "rm -f README.md LICENSE",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
