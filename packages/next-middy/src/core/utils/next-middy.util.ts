@@ -191,10 +191,7 @@ const executeHandler = async <I, O>(
       if (isDev || verbose) {
         res.status(normalisedError.status).json(normalisedError)
       } else {
-        res.status(normalisedError.status).json({
-          name: normalisedError.name,
-          code: normalisedError.code,
-        })
+        res.status(normalisedError.status).json({ code: normalisedError.code })
       }
     }
   }
