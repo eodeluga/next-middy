@@ -43,7 +43,7 @@ next-middy solves that by introducing a **structured middleware pipeline**:
 
 Everything is fully typed — ensuring middleware input/output shapes are inferred automatically.
 
-**Example**
+### Example
 
 ```ts
 // pages/api/example/[name].ts
@@ -84,16 +84,18 @@ export default nextMiddy<InputType, OutputType>((req) => {
 ```
 
 ### Result
-- Validation errors:
+- **Validation errors**:
+
+  *A name containing a number*
   ```json
-  // A name containing a number
   {"code":"ValidationError","name":"ZodValidationError","status":400,"details":[{"code":"custom","path":["name"],"message":"Name must contain only alphabetical characters"}],"method":"GET","timestamp":"2025-10-31T01:03:01.572Z","url":"/api/example/Trevor1"}
   ```
+  
+  *A message that doesn't contain 'Hi'*
   ```json
-  // A message that doesn't contain 'Hi'
   {"code":"ValidationError","name":"ZodValidationError","status":400,"details":[{"code":"custom","path":["message"],"message":"Message must start with \"Hi \""}],"method":"GET","timestamp":"2025-10-31T00:58:52.923Z","url":"/api/example/Trevor"}
   ```
-- Successful requests return:
+- **Successful response**:
   ```json
   { "message": "Hi, Eugene!" }
   ```
@@ -178,7 +180,7 @@ npm link
 | Environment                 | Response shape                            | Description                                 |
 | --------------------------- | ----------------------------------------- | ------------------------------------------- |
 | `NODE_ENV=development`      | Full `EnrichedError` object               | Includes message, stack trace, and metadata |
-| `NODE_ENV=production`       | `{ name, code }`                          | Sanitised; omits internal details           |
+| `NODE_ENV=production`       | `{ code }`                                | Sanitised to just handler error codes       |
 | `MIDDY_VERBOSE_ERRORS=true` | Full `EnrichedError` (in any environment) | Override for temporary diagnostics          |
 
 
