@@ -189,7 +189,14 @@ const executeHandler = async <I, O>(
       const verbose = process.env.MIDDY_VERBOSE_ERRORS === 'true'
 
       if (isDev || verbose) {
-        res.status(normalisedError.status).json(normalisedError)
+        // Add the normally stripped non‑enumerable error properties to the response
+        res.status(normalisedError.status).json({
+          ...normalisedError,
+          message: normalisedError.message,
+          ...(normalisedError instanceof Error
+            ? { stack: normalisedError.stack }
+            : {}),
+        })
       } else {
         res.status(normalisedError.status).json({ code: normalisedError.code })
       }
