@@ -1,6 +1,6 @@
 {
   "name": "next-middy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type-safe, composable middleware framework for Next.js API routes with optional Zod integration.",
   "author": "Eugene Odeluga <eodeluga@users.noreply.github.com> (https://github.com/eodeluga)",
   "license": "MIT",
@@ -22,8 +22,8 @@
     "zod": ">=3.0.0 <5.0.0"
   },
   "devDependencies": {
-    "typescript": "5.6.3",
-    "@types/node": "24.9.1"
+    "@types/node": "24.9.1",
+    "typescript": "5.6.3"
   },
   "exports": {
     ".": {
@@ -42,8 +42,12 @@
   },
   "typesVersions": {
     "*": {
-      "core": ["dist/core/index.d.ts"],
-      "zod": ["dist/zod/index.d.ts"]
+      "core": [
+        "dist/core/index.d.ts"
+      ],
+      "zod": [
+        "dist/zod/index.d.ts"
+      ]
     }
   },
   "repository": {
