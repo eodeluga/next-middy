@@ -6,6 +6,14 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // Node 22.18.0 + tinypool currently crash when spinning worker threads.
+    // Force a single thread so `yarn test` stays stable until upstream fixes it.
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     coverage: {
       reporter: ['text', 'lcov'],
     },
