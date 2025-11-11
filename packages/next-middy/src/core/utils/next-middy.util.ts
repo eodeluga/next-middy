@@ -1,5 +1,33 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const defineIdentityPreservingProperty = <Host extends object, Key extends keyof Host>(
+  host: Host,
+  key: Key,
+  initialValue: Host[Key]
+): void => {
+  let backingValue = initialValue
+
+  Object.defineProperty(host, key, {
+    configurable: true,
+    enumerable: true,
+    get: () => backingValue,
+    set: (nextValue: Host[Key]) => {
+      if (isPlainObject(backingValue) && isPlainObject(nextValue)) {
+        Object.assign(
+          backingValue as Record<string, unknown>,
+          nextValue as Record<string, unknown>
+        )
+        return
+      }
+
+      backingValue = nextValue
+    },
+  })
+}
+
 /**
  * Represents a structured middleware or handler error.
  */
@@ -110,30 +138,31 @@ const nextMiddy = <I extends object = object, O extends object | unknown = unkno
   return apiHandler
 }
 
-const executeHandler = async <I, O>(
+const executeHandler = async <I extends object, O>(
   req: NextMiddyApiRequest<I>,
   res: NextMiddyApiResponse<O>,
   handler: NextMiddyHandlerFn<I, O>,
   middlewares: NextMiddyLifecycle<I, O>[]
 ): Promise<void> => {
   if (!req.internal) { req.internal = {} }
-  if (!req.input) { req.input = {} as I }
+
+  const initialInput = (isPlainObject(req.input) ? req.input : {}) as I
+  defineIdentityPreservingProperty(req, 'input', initialInput)
+  defineIdentityPreservingProperty(res, 'output', res.output as O | undefined)
 
   // Populate req.input with query/body values if no middleware has done so.
-  if (Object.keys(req.input ?? {}).length === 0) {
+  if (Object.keys(initialInput).length === 0) {
     // Strips internal Next.js params (e.g. `_rsc`) to avoid leaking them into input.
     const filteredQuery = Object.fromEntries(
       Object.entries(req.query).filter(([key]) => !key.startsWith('_'))
     )
-    req.input = { ...filteredQuery, ...(req.body || {}) } as I
+    Object.assign(initialInput, filteredQuery, req.body || {})
   }
 
   try {
     for (const middleware of middlewares) {
       if (middleware.before) {
-        const prev = req.input
         await middleware.before(req, res)
-        req.input = { ...prev, ...req.input }
         if (res.headersSent) { return }
       }
     }
