@@ -1,6 +1,6 @@
 {
   "name": "next-middy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Type-safe, composable middleware framework for Next.js API routes with optional Zod integration.",
   "author": "Eugene Odeluga <eodeluga@users.noreply.github.com> (https://github.com/eodeluga)",
   "license": "MIT",
