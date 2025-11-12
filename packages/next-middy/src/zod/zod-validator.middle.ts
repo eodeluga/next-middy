@@ -20,7 +20,7 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
     }
 
     // Attach validated input to `req`
-    req.input = parsed.data
+    req.input = parsed.data as z.infer<I>
   },
 
   // Validates the response output
@@ -33,6 +33,6 @@ export const zodValidatorMiddle = <I extends z.ZodTypeAny, O extends z.ZodTypeAn
     }
 
     // Attach validated output
-    res.output = parsed.data
+    res.output = parsed.data as z.infer<O>
   },
 })

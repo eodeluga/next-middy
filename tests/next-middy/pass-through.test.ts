@@ -117,4 +117,63 @@ describe('nextMiddy pass-through', () => {
 
     expect(res.output).toEqual({ items: ['A', 'B'], count: 2 })
   })
+
+  it('keeps req.input reference stable when middleware reassign objects', async () => {
+    type Input = { initial?: string; first?: string; second?: string }
+    type Output = { ok: boolean }
+
+    const { req, res } = createMockContext<Input, Output>({ initial: 'seed' })
+    const originalInput = req.input
+
+    const firstMiddleware = {
+      before: (req: NextMiddyApiRequest<Input>) => {
+        req.input = { first: 'one' }
+      },
+    }
+
+    const secondMiddleware = {
+      before: (req: NextMiddyApiRequest<Input>) => {
+        req.input = { second: 'two' }
+      },
+    }
+
+    const handler = nextMiddy<Input, Output>((req) => {
+      expect(req.input).toBe(originalInput)
+      return { ok: true }
+    })
+      .use(firstMiddleware)
+      .use(secondMiddleware)
+
+    await handler(req, res)
+
+    expect(req.input).toBe(originalInput)
+    expect(req.input).toEqual({ initial: 'seed', first: 'one', second: 'two' })
+    expect(res.output).toEqual({ ok: true })
+  })
+
+  it('preserves res.output identity when after middleware reassigns objects', async () => {
+    type Input = { value: string }
+    type Output = { value?: string; decorated?: boolean }
+
+    const { req, res } = createMockContext<Input, Output>({ value: 'hello' })
+
+    let handlerPayload: Output | undefined
+
+    const decorateResponse = {
+      after: (_: NextMiddyApiRequest<Input>, res: NextMiddyApiResponse<Output>) => {
+        expect(res.output).toBe(handlerPayload)
+        res.output = { decorated: true }
+      },
+    }
+
+    const handler = nextMiddy<Input, Output>((req) => {
+      handlerPayload = { value: req.input.value }
+      return handlerPayload
+    }).use(decorateResponse)
+
+    await handler(req, res)
+
+    expect(res.output).toBe(handlerPayload)
+    expect(res.output).toEqual({ value: 'hello', decorated: true })
+  })
 })
