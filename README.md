@@ -138,6 +138,21 @@ nextMiddy(handler)
   .use(errorMiddle)
 ```
 
+> **Middleware order considerations**
+    >
+    >**next-middy** merges plain-object assignments into `req.input` (*it doesn’t replace the object*).
+    >
+    > This has consequences for validator middleware that expect a strict shape (e.g. `zodValidatorMiddle`), which can fail with unrecognized_keys if another middleware mutates req.input first.
+    >
+    >You can workaround this by either:
+    >
+    >* Validate first: `.use(zodValidatorMiddle(Input, Output))` before any middleware that mutates req.input.
+    >
+    > * Allow extras: use `.passthrough()` on your input schemas.
+    >
+    >   *Optional*: Put system fields on req.internal instead of req.input.
+    >
+    > Output schemas are unaffected — keep them strict.
 ---
 
 ## How to Build

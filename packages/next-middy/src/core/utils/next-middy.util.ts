@@ -181,7 +181,15 @@ const executeHandler = async <I extends object, O>(
     }
 
     if (!res.headersSent) {
-      res.status(200).json(res.output ? { ...res.output } : {})
+      let output: unknown[] | Record<string, unknown>
+      if (res.output) {
+        output = Array.isArray(res.output)
+          ? res.output
+          : { ...res.output }
+      } else {
+        output = {}
+      }
+      res.status(200).json(output)
     }
 
   } catch (err) {
@@ -198,7 +206,7 @@ const executeHandler = async <I extends object, O>(
         message: err instanceof Error ? err.message : String(err),
         status: 500,
       }
-    
+
     // Use `internal` as a middleware scratch pad
     req.internal.error = normalisedError
 
