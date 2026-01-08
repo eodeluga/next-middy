@@ -176,4 +176,42 @@ describe('nextMiddy pass-through', () => {
     expect(res.output).toBe(handlerPayload)
     expect(res.output).toEqual({ value: 'hello', decorated: true })
   })
+
+  it('serialises handler array output without wrapping it in an object', async () => {
+    type Input = { id: number }
+    type Output = { id: number; value: string }[]
+
+    const { req, res } = createMockContext<Input, Output>({ id: 1 })
+
+    const handler = nextMiddy<Input, Output>((req) => {
+      return [
+        { id: req.input.id, value: 'one' },
+        { id: req.input.id + 1, value: 'two' },
+      ]
+    })
+
+    await handler(req, res)
+
+    expect(Array.isArray(res.output)).toBe(true)
+    expect(res.output).toEqual([
+      { id: 1, value: 'one' },
+      { id: 2, value: 'two' },
+    ])
+  })
+
+  it('falls back to an empty object when no output is produced', async () => {
+    type Input = { id: number }
+    type Output = Record<string, never>
+
+    const { req, res } = createMockContext<Input, Output>({ id: 1 })
+
+    const handler = nextMiddy<Input, Output>(() => {
+      // no explicit return, no middleware writes to res.output
+    })
+
+    await handler(req, res)
+
+    expect(res.output).toEqual({})
+    expect(res.statusCode).toBe(200)
+  })
 })
