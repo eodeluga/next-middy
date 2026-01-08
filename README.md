@@ -142,7 +142,7 @@ nextMiddy(handler)
     >
     >**next-middy** merges plain-object assignments into `req.input` (*it doesn’t replace the object*).
     >
-    > This has consequences for validator middleware that expect a strict shape (e.g. `zodValidatorMiddle`), which can fail with unrecognized_keys if another middleware mutates req.input first.
+    > This has consequences for validator middleware that expect a strict shape (e.g. `zodValidatorMiddle`), which can fail with unrecognised keys if another middleware mutates req.input first.
     >
     >You can workaround this by either:
     >
